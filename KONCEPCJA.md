@@ -1,245 +1,549 @@
-# Koncepcja Wstępna - Edytor Równań
+# Koncepcja - Edytor Równań (Rewizja)
+
+## Spis treści
+
+1. [Opis projektu](#opis-projektu)
+2. [Cele projektu](#cele-projektu)
+3. [Przegląd założeń](#przegląd-założeń)
+4. [Etapy projektu](#etapy-projektu)
+5. [Szczegółowy plan zadań](#szczegółowy-plan-zadań)
+6. [Architektura systemu](#architektura-systemu)
+7. [Wymagania techniczne](#wymagania-techniczne)
+8. [Ryzyka i mitygacja](#ryzyka-i-mitygacja)
+9. [Harmonogram](#harmonogram)
+
+---
 
 ## Opis projektu
 
-Program w języku Python, który:
-1. Wczytuje dane z pliku Excel
-2. Wykonuje obliczenia według przygotowanych funkcji
-3. Generuje dokument Word z równaniami oraz równaniami z podstawionymi danymi
+**Edytor Równań** to aplikacja w języku Python służąca do automatyzacji procesu przetwarzania danych z plików Excel i generowania dokumentów Word zawierających równania matematyczne wraz z obliczonymi wynikami.
+
+### Główne funkcjonalności
+
+1. 📊 Wczytywanie danych (zmiennych i ich wartości) z plików Excel (.xlsx)
+2. 🔢 Parsowanie i obliczanie równań matematycznych z użyciem symboli
+3. 📝 Generowanie profesjonalnych dokumentów Word z wynikami obliczeń
+4. ✨ Obsługa notacji matematycznej (potęgi, pierwiastki, funkcje trygonometryczne)
 
 ---
 
-## Proponowane biblioteki i moduły
+## Cele projektu
 
-### 1. Obsługa plików Excel
+### Cele główne
 
-| Biblioteka | Opis | Zastosowanie |
-|------------|------|--------------|
-| **openpyxl** | Biblioteka do odczytu i zapisu plików Excel (.xlsx) | Główna biblioteka do wczytywania danych wejściowych |
-| **pandas** | Biblioteka do analizy danych | Ułatwia manipulację danymi tabelarycznymi |
+| Cel | Opis | Priorytet |
+|-----|------|-----------|
+| **C1** | Automatyzacja obliczeń inżynierskich | Wysoki |
+| **C2** | Generowanie czytelnej dokumentacji obliczeń | Wysoki |
+| **C3** | Eliminacja ręcznego przepisywania wzorów | Średni |
+| **C4** | Standaryzacja formatu dokumentacji | Średni |
 
-```python
-# Przykład użycia
-import pandas as pd
-from openpyxl import load_workbook
+### Cele szczegółowe
 
-# Wczytanie danych
-df = pd.read_excel('dane.xlsx', sheet_name='Dane')
-```
-
-### 2. Obsługa plików Word
-
-| Biblioteka | Opis | Zastosowanie |
-|------------|------|--------------|
-| **python-docx** | Biblioteka do tworzenia i edycji dokumentów Word (.docx) | Tworzenie dokumentu wynikowego |
-
-```python
-# Przykład użycia
-from docx import Document
-
-doc = Document()
-doc.add_heading('Obliczenia', level=1)
-doc.add_paragraph('Równanie: a + b = c')
-doc.save('wynik.docx')
-```
-
-### 3. Obsługa równań matematycznych
-
-| Biblioteka | Opis | Zastosowanie |
-|------------|------|--------------|
-| **sympy** | Biblioteka do obliczeń symbolicznych | Parsowanie i obliczanie równań matematycznych |
-| **latex2mathml** | Konwersja LaTeX do MathML | Formatowanie równań w dokumencie Word |
-
-```python
-# Przykład użycia SymPy
-from sympy import symbols, sympify, latex
-
-x, y = symbols('x y')
-equation = sympify('x**2 + 2*x + 1')
-result = equation.subs(x, 5)  # Podstawienie wartości
-latex_eq = latex(equation)    # Konwersja do LaTeX
-```
-
-### 4. Dodatkowe moduły standardowe
-
-| Moduł | Opis | Zastosowanie |
-|-------|------|--------------|
-| **pathlib** | Obsługa ścieżek do plików | Zarządzanie plikami wejściowymi/wyjściowymi |
-| **typing** | Typowanie statyczne | Poprawa czytelności kodu |
-| **dataclasses** | Klasy danych | Struktury danych dla równań |
+- Skrócenie czasu przygotowania dokumentacji obliczeń o 70%
+- Eliminacja błędów przy przepisywaniu wzorów i wartości
+- Możliwość wielokrotnego generowania dokumentów dla różnych danych
 
 ---
 
-## Proponowana architektura
+## Przegląd założeń
 
-### Struktura projektu
+### Status realizacji założeń
+
+| Założenie | Status | Uwagi |
+|-----------|--------|-------|
+| Wczytywanie danych z Excel | ✅ Zaimplementowane | Moduł `excel_reader.py` |
+| Parsowanie równań (SymPy) | ✅ Zaimplementowane | Moduł `equation_parser.py` |
+| Generowanie dokumentów Word | ✅ Zaimplementowane | Moduł `word_writer.py` |
+| Interfejs CLI | ✅ Zaimplementowane | Moduł `main.py` |
+| Testy jednostkowe | 🟡 Częściowo | Tylko `test_equation_parser.py` |
+| Obsługa jednostek | ⬜ Do zrobienia | Rozszerzenie |
+| GUI | ⬜ Do zrobienia | Rozszerzenie |
+| Formatowanie OMML | ⬜ Do zrobienia | Rozszerzenie |
+
+### Weryfikacja bibliotek
+
+| Biblioteka | Wersja min. | Status | Wykorzystanie |
+|------------|-------------|--------|---------------|
+| openpyxl | 3.1.0 | ✅ Aktywna | Odczyt plików Excel |
+| pandas | 2.0.0 | ✅ Aktywna | Manipulacja danymi |
+| python-docx | 1.0.0 | ✅ Aktywna | Generowanie Word |
+| sympy | 1.12 | ✅ Aktywna | Obliczenia symboliczne |
+
+---
+
+## Etapy projektu
+
+Projekt podzielony jest na **4 główne etapy**:
 
 ```
-edytor_rownan/
-├── src/
-│   ├── __init__.py
-│   ├── excel_reader.py      # Moduł do wczytywania danych z Excel
-│   ├── equation_parser.py   # Moduł do parsowania i obliczania równań
-│   ├── word_writer.py       # Moduł do generowania dokumentu Word
-│   └── main.py              # Główny punkt wejścia programu
-├── templates/
-│   └── szablon_excel.xlsx   # Szablon pliku Excel z danymi
-├── tests/
-│   ├── __init__.py
-│   ├── test_excel_reader.py
-│   ├── test_equation_parser.py
-│   └── test_word_writer.py
-├── requirements.txt
-├── README.md
-└── KONCEPCJA.md
-```
-
-### Diagram przepływu danych
-
-```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   Plik Excel    │────▶│   Parser równań  │────▶│  Dokument Word  │
-│ (dane + wzory)  │     │   (obliczenia)   │     │   (wyniki)      │
-└─────────────────┘     └──────────────────┘     └─────────────────┘
-        │                        │                        │
-        ▼                        ▼                        ▼
-   - Wartości              - Parsowanie             - Równania
-   - Typ obliczeń          - Podstawianie           - Wartości podstawione
-   - Wzory                 - Obliczanie             - Wyniki
+┌─────────────────────────────────────────────────────────────────────┐
+│                        ETAPY PROJEKTU                               │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ETAP 1: Fundament        ──────────────────────────►  ✅ UKOŃCZONY │
+│  (Podstawowa funkcjonalność)                                        │
+│                                                                     │
+│  ETAP 2: Stabilizacja     ──────────────────────────►  🟡 W TRAKCIE│
+│  (Testy i walidacja)                                                │
+│                                                                     │
+│  ETAP 3: Rozszerzenie     ──────────────────────────►  ⬜ PLANOWANY│
+│  (Dodatkowe funkcje)                                                │
+│                                                                     │
+│  ETAP 4: Produkcja        ──────────────────────────►  ⬜ PLANOWANY│
+│  (GUI i dokumentacja)                                               │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Proponowany format danych w Excel
+## Szczegółowy plan zadań
 
-### Arkusz "Dane"
+### ETAP 1: Fundament (Podstawowa funkcjonalność) ✅
 
-| Nazwa zmiennej | Wartość | Jednostka |
-|----------------|---------|-----------|
-| a              | 5       | m         |
-| b              | 3       | m         |
-| c              | 4       | m         |
+**Cel etapu:** Stworzenie działającego prototypu z podstawową funkcjonalnością.
 
-### Arkusz "Równania"
+#### Zadanie 1.1: Struktura projektu ✅
 
-| ID | Nazwa równania | Wzór          | Opis                    |
-|----|----------------|---------------|-------------------------|
-| 1  | Suma           | a + b         | Suma dwóch wartości     |
-| 2  | Pitagoras      | sqrt(a^2+b^2) | Twierdzenie Pitagorasa  |
-| 3  | Pole           | a * b / 2     | Pole trójkąta           |
+| Podzadanie | Opis | Status | Plik/Lokalizacja |
+|------------|------|--------|------------------|
+| 1.1.1 | Utworzenie struktury katalogów | ✅ | `src/`, `tests/`, `templates/` |
+| 1.1.2 | Konfiguracja zależności | ✅ | `requirements.txt` |
+| 1.1.3 | Dokumentacja wstępna | ✅ | `README.md`, `KONCEPCJA.md` |
+| 1.1.4 | Konfiguracja Git i GitHub | ✅ | `.git/`, `.github/` |
 
----
-
-## Proponowany przepływ pracy programu
-
-### 1. Wczytanie danych
-
-```python
-class ExcelReader:
-    def __init__(self, file_path: str):
-        self.file_path = file_path
-    
-    def read_variables(self) -> dict:
-        """Wczytuje zmienne z arkusza 'Dane'"""
-        df = pd.read_excel(self.file_path, sheet_name='Dane')
-        return dict(zip(df['Nazwa zmiennej'], df['Wartość']))
-    
-    def read_equations(self) -> list:
-        """Wczytuje równania z arkusza 'Równania'"""
-        df = pd.read_excel(self.file_path, sheet_name='Równania')
-        return df.to_dict('records')
-```
-
-### 2. Parsowanie i obliczanie równań
-
-```python
-from sympy import sympify, symbols, latex
-from sympy.parsing.sympy_parser import parse_expr
-
-class EquationParser:
-    def __init__(self, variables: dict):
-        self.variables = variables
-    
-    def parse_equation(self, equation_str: str):
-        """Parsuje równanie do postaci symbolicznej"""
-        return sympify(equation_str)
-    
-    def substitute_values(self, equation):
-        """Podstawia wartości zmiennych do równania"""
-        return equation.subs(self.variables)
-    
-    def calculate(self, equation) -> float:
-        """Oblicza wartość równania"""
-        result = self.substitute_values(equation)
-        return float(result.evalf())
-    
-    def to_latex(self, equation) -> str:
-        """Konwertuje równanie do formatu LaTeX"""
-        return latex(equation)
-```
-
-### 3. Generowanie dokumentu Word
-
-```python
-from docx import Document
-from docx.shared import Pt
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
-
-class WordWriter:
-    def __init__(self, output_path: str):
-        self.doc = Document()
-        self.output_path = output_path
-    
-    def add_equation_section(self, name: str, equation_str: str, 
-                             equation_with_values: str, result: float):
-        """Dodaje sekcję z równaniem do dokumentu"""
-        self.doc.add_heading(name, level=2)
-        self.doc.add_paragraph(f'Wzór: {equation_str}')
-        self.doc.add_paragraph(f'Po podstawieniu: {equation_with_values}')
-        self.doc.add_paragraph(f'Wynik: {result}')
-    
-    def save(self):
-        """Zapisuje dokument"""
-        self.doc.save(self.output_path)
-```
+**Kryteria akceptacji:**
+- [x] Struktura katalogów zgodna z konwencją Python
+- [x] Plik requirements.txt z wszystkimi zależnościami
+- [x] README z instrukcją instalacji i użycia
 
 ---
 
-## Wymagania systemowe
+#### Zadanie 1.2: Moduł wczytywania danych (ExcelReader) ✅
 
-### requirements.txt
+| Podzadanie | Opis | Status | Metoda/Funkcja |
+|------------|------|--------|----------------|
+| 1.2.1 | Walidacja ścieżki do pliku | ✅ | `__init__()` |
+| 1.2.2 | Wczytywanie zmiennych | ✅ | `read_variables()` |
+| 1.2.3 | Wczytywanie równań | ✅ | `read_equations()` |
+| 1.2.4 | Listowanie arkuszy | ✅ | `get_sheet_names()` |
 
-```
-openpyxl>=3.1.0
-pandas>=2.0.0
-python-docx>=1.0.0
-sympy>=1.12
-```
+**Kryteria akceptacji:**
+- [x] Obsługa plików .xlsx
+- [x] Elastyczne nazwy kolumn
+- [x] Obsługa błędów (brak pliku)
 
-### Wersja Pythona
-
-- Python 3.10 lub nowszy
-
----
-
-## Możliwe rozszerzenia
-
-1. **GUI** - Interfejs graficzny z użyciem `tkinter` lub `PyQt`
-2. **Obsługa jednostek** - Biblioteka `pint` do konwersji jednostek
-3. **Szablony Word** - Możliwość użycia szablonów dokumentów
-4. **Walidacja danych** - Sprawdzanie poprawności danych wejściowych
-5. **Obsługa MathML/OMML** - Lepsze formatowanie równań w Word
+**Kod źródłowy:** `src/excel_reader.py`
 
 ---
 
-## Następne kroki
+#### Zadanie 1.3: Moduł parsowania równań (EquationParser) ✅
 
-1. ✅ Opracowanie koncepcji wstępnej
-2. ⬜ Utworzenie struktury projektu
-3. ⬜ Implementacja modułu `excel_reader`
-4. ⬜ Implementacja modułu `equation_parser`
-5. ⬜ Implementacja modułu `word_writer`
-6. ⬜ Integracja modułów w `main.py`
-7. ⬜ Testy jednostkowe
-8. ⬜ Dokumentacja użytkownika
+| Podzadanie | Opis | Status | Metoda/Funkcja |
+|------------|------|--------|----------------|
+| 1.3.1 | Parsowanie wyrażeń tekstowych | ✅ | `parse_equation()` |
+| 1.3.2 | Podstawianie wartości | ✅ | `substitute_values()` |
+| 1.3.3 | Obliczanie wyników | ✅ | `calculate()` |
+| 1.3.4 | Konwersja do LaTeX | ✅ | `to_latex()` |
+| 1.3.5 | Formatowanie z wartościami | ✅ | `format_equation_with_values()` |
+| 1.3.6 | Przetwarzanie pełne | ✅ | `process_equation()` |
+
+**Kryteria akceptacji:**
+- [x] Obsługa operatorów: +, -, *, /, ^, **
+- [x] Obsługa funkcji: sqrt, sin, cos, tan, log
+- [x] Poprawna konwersja ^ na **
+- [x] Struktura danych EquationResult
+
+**Kod źródłowy:** `src/equation_parser.py`
+
+---
+
+#### Zadanie 1.4: Moduł generowania dokumentów (WordWriter) ✅
+
+| Podzadanie | Opis | Status | Metoda/Funkcja |
+|------------|------|--------|----------------|
+| 1.4.1 | Inicjalizacja dokumentu | ✅ | `__init__()`, `_setup_document()` |
+| 1.4.2 | Dodawanie sekcji równań | ✅ | `add_equation_section()` |
+| 1.4.3 | Tabela zmiennych | ✅ | `add_variables_table()` |
+| 1.4.4 | Sekcja wyników | ✅ | `add_results_section()` |
+| 1.4.5 | Zapis dokumentu | ✅ | `save()` |
+
+**Kryteria akceptacji:**
+- [x] Generowanie plików .docx
+- [x] Formatowanie tabel
+- [x] Konfigurowalana precyzja wyników
+
+**Kod źródłowy:** `src/word_writer.py`
+
+---
+
+#### Zadanie 1.5: Integracja i CLI (main.py) ✅
+
+| Podzadanie | Opis | Status | Funkcja |
+|------------|------|--------|---------|
+| 1.5.1 | Funkcja przetwarzania | ✅ | `process_equations()` |
+| 1.5.2 | Parser argumentów CLI | ✅ | `main()` |
+| 1.5.3 | Obsługa błędów | ✅ | try/except |
+| 1.5.4 | Mapowanie nazw kolumn | ✅ | `get_column_value()` |
+
+**Kryteria akceptacji:**
+- [x] Działający interfejs CLI
+- [x] Obsługa parametrów wejściowych
+- [x] Informacyjne komunikaty błędów
+
+**Kod źródłowy:** `src/main.py`
+
+---
+
+### ETAP 2: Stabilizacja (Testy i walidacja) 🟡
+
+**Cel etapu:** Zapewnienie jakości kodu i stabilności działania.
+
+#### Zadanie 2.1: Testy jednostkowe
+
+| Podzadanie | Opis | Status | Plik testowy |
+|------------|------|--------|--------------|
+| 2.1.1 | Testy EquationParser | ✅ | `tests/test_equation_parser.py` |
+| 2.1.2 | Testy ExcelReader | ⬜ | `tests/test_excel_reader.py` (do utworzenia) |
+| 2.1.3 | Testy WordWriter | ⬜ | `tests/test_word_writer.py` (do utworzenia) |
+| 2.1.4 | Testy integracyjne main | ⬜ | `tests/test_main.py` (do utworzenia) |
+
+**Kryteria akceptacji:**
+- [ ] Pokrycie kodu testami > 80%
+- [ ] Wszystkie testy przechodzą
+- [ ] Testy przypadków brzegowych
+
+---
+
+#### Zadanie 2.2: Walidacja danych wejściowych
+
+| Podzadanie | Opis | Status | Lokalizacja |
+|------------|------|--------|-------------|
+| 2.2.1 | Walidacja formatu Excel | ⬜ | `excel_reader.py` |
+| 2.2.2 | Walidacja składni równań | ⬜ | `equation_parser.py` |
+| 2.2.3 | Sprawdzanie kompletności zmiennych | ⬜ | `equation_parser.py` |
+| 2.2.4 | Informacyjne komunikaty błędów | ⬜ | Wszystkie moduły |
+
+**Kryteria akceptacji:**
+- [ ] Czytelne komunikaty błędów
+- [ ] Walidacja przed przetwarzaniem
+- [ ] Sugestie naprawy błędów
+
+---
+
+#### Zadanie 2.3: Obsługa błędów i wyjątków
+
+| Podzadanie | Opis | Status | Typ wyjątku |
+|------------|------|--------|-------------|
+| 2.3.1 | Błędy plików | 🟡 | `FileNotFoundError` |
+| 2.3.2 | Błędy parsowania | ⬜ | `SyntaxError`, `ValueError` |
+| 2.3.3 | Błędy obliczeń | ⬜ | `ZeroDivisionError`, `MathError` |
+| 2.3.4 | Własne wyjątki domenowe | ⬜ | `EquationError`, `DataError` |
+
+**Kryteria akceptacji:**
+- [ ] Hierarchia własnych wyjątków
+- [ ] Graceful degradation
+- [ ] Logging błędów
+
+---
+
+### ETAP 3: Rozszerzenie (Dodatkowe funkcje) ⬜
+
+**Cel etapu:** Dodanie zaawansowanych funkcjonalności.
+
+#### Zadanie 3.1: Obsługa jednostek miary
+
+| Podzadanie | Opis | Status | Biblioteka |
+|------------|------|--------|------------|
+| 3.1.1 | Integracja biblioteki pint | ⬜ | `pint` |
+| 3.1.2 | Wczytywanie jednostek z Excel | ⬜ | - |
+| 3.1.3 | Konwersja jednostek | ⬜ | - |
+| 3.1.4 | Wyświetlanie jednostek w Word | ⬜ | - |
+
+**Kryteria akceptacji:**
+- [ ] Obsługa jednostek SI
+- [ ] Automatyczna konwersja
+- [ ] Walidacja zgodności jednostek
+
+---
+
+#### Zadanie 3.2: Formatowanie równań OMML
+
+| Podzadanie | Opis | Status | Opis techniczny |
+|------------|------|--------|-----------------|
+| 3.2.1 | Konwersja LaTeX → OMML | ⬜ | Office Math Markup Language |
+| 3.2.2 | Wstawianie obiektów matematycznych | ⬜ | `python-docx` + lxml |
+| 3.2.3 | Style równań | ⬜ | Formatowanie wizualne |
+| 3.2.4 | Numeracja równań | ⬜ | Automatyczna numeracja |
+
+**Kryteria akceptacji:**
+- [ ] Równania jako obiekty OMML w Word
+- [ ] Poprawne renderowanie w MS Word
+- [ ] Edytowalność równań
+
+---
+
+#### Zadanie 3.3: Szablony dokumentów
+
+| Podzadanie | Opis | Status | Format |
+|------------|------|--------|--------|
+| 3.3.1 | System szablonów Word | ⬜ | `.dotx` |
+| 3.3.2 | Placeholdery w szablonach | ⬜ | `{{zmienna}}` |
+| 3.3.3 | Style z szablonu | ⬜ | Dziedziczenie stylów |
+| 3.3.4 | Predefiniowane szablony | ⬜ | Obliczenia, Raport |
+
+**Kryteria akceptacji:**
+- [ ] Obsługa szablonów .dotx
+- [ ] Personalizacja wyglądu dokumentów
+- [ ] Zachowanie formatowania szablonu
+
+---
+
+#### Zadanie 3.4: Rozszerzona notacja matematyczna
+
+| Podzadanie | Opis | Status | Przykład |
+|------------|------|--------|----------|
+| 3.4.1 | Sumy i produkty | ⬜ | `Σ`, `Π` |
+| 3.4.2 | Całki | ⬜ | `∫` |
+| 3.4.3 | Macierze | ⬜ | `[[a,b],[c,d]]` |
+| 3.4.4 | Indeksy górne/dolne | ⬜ | `x_1`, `x^2` |
+
+**Kryteria akceptacji:**
+- [ ] Obsługa zaawansowanych symboli
+- [ ] Poprawne renderowanie w Word
+- [ ] Dokumentacja składni
+
+---
+
+### ETAP 4: Produkcja (GUI i dokumentacja) ⬜
+
+**Cel etapu:** Przygotowanie aplikacji do użycia produkcyjnego.
+
+#### Zadanie 4.1: Interfejs graficzny (GUI)
+
+| Podzadanie | Opis | Status | Technologia |
+|------------|------|--------|-------------|
+| 4.1.1 | Wybór frameworka | ⬜ | tkinter / PyQt |
+| 4.1.2 | Okno główne | ⬜ | Layout, menu |
+| 4.1.3 | Wybór plików | ⬜ | File dialogs |
+| 4.1.4 | Podgląd danych | ⬜ | Tabele, listy |
+| 4.1.5 | Podgląd wyników | ⬜ | Preview |
+| 4.1.6 | Ustawienia | ⬜ | Preferences |
+
+**Kryteria akceptacji:**
+- [ ] Intuicyjny interfejs
+- [ ] Obsługa drag & drop
+- [ ] Podgląd przed generowaniem
+
+---
+
+#### Zadanie 4.2: Dokumentacja użytkownika
+
+| Podzadanie | Opis | Status | Format |
+|------------|------|--------|--------|
+| 4.2.1 | Instrukcja instalacji | 🟡 | README.md |
+| 4.2.2 | Podręcznik użytkownika | ⬜ | docs/manual.md |
+| 4.2.3 | Przykłady użycia | ⬜ | examples/ |
+| 4.2.4 | FAQ | ⬜ | docs/faq.md |
+| 4.2.5 | Changelog | ⬜ | CHANGELOG.md |
+
+**Kryteria akceptacji:**
+- [ ] Kompletna dokumentacja
+- [ ] Przykłady dla każdej funkcji
+- [ ] Zrzuty ekranu GUI
+
+---
+
+#### Zadanie 4.3: Dokumentacja techniczna
+
+| Podzadanie | Opis | Status | Narzędzie |
+|------------|------|--------|-----------|
+| 4.3.1 | Docstrings API | 🟡 | Istniejące |
+| 4.3.2 | Generowanie dokumentacji | ⬜ | Sphinx / MkDocs |
+| 4.3.3 | Diagramy UML | ⬜ | PlantUML / Mermaid |
+| 4.3.4 | Architektura systemu | ⬜ | docs/architecture.md |
+
+**Kryteria akceptacji:**
+- [ ] Dokumentacja API online
+- [ ] Diagramy klas i sekwencji
+- [ ] Opis architektury
+
+---
+
+#### Zadanie 4.4: Dystrybucja i wdrożenie
+
+| Podzadanie | Opis | Status | Narzędzie |
+|------------|------|--------|-----------|
+| 4.4.1 | Pakiet PyPI | ⬜ | setuptools / poetry |
+| 4.4.2 | Executable (Windows) | ⬜ | PyInstaller |
+| 4.4.3 | CI/CD pipeline | ⬜ | GitHub Actions |
+| 4.4.4 | Wersjonowanie | ⬜ | Semantic Versioning |
+
+**Kryteria akceptacji:**
+- [ ] Możliwość instalacji przez pip
+- [ ] Plik .exe dla Windows
+- [ ] Automatyczne testy i release
+
+---
+
+## Architektura systemu
+
+### Diagram komponentów
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                            EDYTOR RÓWNAŃ                               │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐             │
+│  │    main.py   │───▶│ CLI / GUI    │───▶│   Output     │             │
+│  │  (Kontroler) │    │  Interface   │    │   Handler    │             │
+│  └──────┬───────┘    └──────────────┘    └──────────────┘             │
+│         │                                                              │
+│         ▼                                                              │
+│  ┌──────────────────────────────────────────────────────────────────┐ │
+│  │                         WARSTWA LOGIKI                           │ │
+│  ├──────────────────┬───────────────────┬──────────────────────────┤ │
+│  │                  │                   │                          │ │
+│  │  ExcelReader     │  EquationParser   │  WordWriter              │ │
+│  │  ┌────────────┐  │  ┌─────────────┐  │  ┌─────────────┐        │ │
+│  │  │read_vars() │  │  │parse_eq()   │  │  │add_section()│        │ │
+│  │  │read_eqs()  │  │  │calculate()  │  │  │add_table()  │        │ │
+│  │  │get_sheets()│  │  │to_latex()   │  │  │save()       │        │ │
+│  │  └────────────┘  │  └─────────────┘  │  └─────────────┘        │ │
+│  │                  │                   │                          │ │
+│  └──────────────────┴───────────────────┴──────────────────────────┘ │
+│         │                   │                   │                     │
+│         ▼                   ▼                   ▼                     │
+│  ┌──────────────────────────────────────────────────────────────────┐ │
+│  │                      WARSTWA ZEWNĘTRZNA                          │ │
+│  ├────────────────┬─────────────────┬───────────────────────────────┤ │
+│  │   pandas       │    sympy        │    python-docx                │ │
+│  │   openpyxl     │                 │                               │ │
+│  └────────────────┴─────────────────┴───────────────────────────────┘ │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+### Przepływ danych
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Excel     │     │   Python    │     │   SymPy     │     │    Word     │
+│   (.xlsx)   │────▶│   Dict      │────▶│   Expr      │────▶│   (.docx)   │
+└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+      │                   │                   │                   │
+      ▼                   ▼                   ▼                   ▼
+  Zmienne            Struktury           Obliczenia          Dokument
+  Równania           danych             symboliczne          wynikowy
+```
+
+---
+
+## Wymagania techniczne
+
+### Środowisko
+
+| Wymaganie | Wersja min. | Zalecana |
+|-----------|-------------|----------|
+| Python | 3.10 | 3.11+ |
+| pip | 21.0 | Najnowsza |
+| Pamięć RAM | 512 MB | 2 GB |
+| Miejsce na dysku | 100 MB | 500 MB |
+
+### Zależności
+
+```
+# requirements.txt
+openpyxl>=3.1.0      # Obsługa Excel
+pandas>=2.0.0        # Manipulacja danymi
+python-docx>=1.0.0   # Generowanie Word
+sympy>=1.12          # Obliczenia symboliczne
+
+# Opcjonalne (Etap 3-4)
+# pint>=0.22         # Jednostki miary
+# PyQt6>=6.5.0       # GUI (alternatywa)
+```
+
+---
+
+## Ryzyka i mitygacja
+
+### Macierz ryzyk
+
+| Ryzyko | Prawdopodobieństwo | Wpływ | Mitygacja |
+|--------|-------------------|-------|-----------|
+| Błędy w parsowaniu złożonych równań | Średnie | Wysoki | Rozbudowane testy, walidacja wejścia |
+| Niekompatybilność formatów Excel | Niskie | Średni | Obsługa wielu formatów kolumn |
+| Problemy z formatowaniem OMML | Wysokie | Średni | Fallback do tekstu, dokumentacja |
+| Wydajność przy dużych plikach | Niskie | Niski | Lazy loading, optymalizacja |
+| Zależności zewnętrzne | Niskie | Wysoki | Pinowanie wersji, testy CI |
+
+### Plan działań naprawczych
+
+1. **Błędy parsowania:** Dodać tryb "verbose" z logowaniem kroków parsowania
+2. **Format Excel:** Implementacja wielu parserów z automatycznym wykrywaniem
+3. **OMML:** Przygotować dokumentację ograniczeń i workaroundów
+
+---
+
+## Harmonogram
+
+### Oś czasu projektu
+
+> **Uwaga:** Poniższy harmonogram przedstawia planowany przebieg projektu. Etap 1 został ukończony, pozostałe etapy są w trakcie realizacji lub planowane.
+
+```
+2024 Q4         2025 Q1         2025 Q2         2025 Q3
+   │               │               │               │
+   ├───ETAP 1──────┤               │               │
+   │   ████████████│               │               │
+   │   Fundament   │ (ukończony)   │               │
+   │               │               │               │
+   │               ├───ETAP 2──────┤               │
+   │               │   ████████████│               │
+   │               │  Stabilizacja │               │
+   │               │               │               │
+   │               │               ├───ETAP 3──────┤
+   │               │               │   ████████████│
+   │               │               │   Rozszerzenie│
+   │               │               │               │
+   │               │               │               ├───ETAP 4───▶
+   │               │               │               │   ██████████
+   │               │               │               │   Produkcja
+   │               │               │               │
+```
+
+### Kamienie milowe
+
+| Milestone | Opis | Data docelowa | Status |
+|-----------|------|---------------|--------|
+| **M1** | Działający prototyp CLI | 2024 Q4 | ✅ Ukończony |
+| **M2** | Pełne pokrycie testami | 2025 Q1 | 🟡 W trakcie |
+| **M3** | Obsługa jednostek i OMML | 2025 Q2 | ⬜ Planowany |
+| **M4** | Wersja produkcyjna z GUI | 2025 Q3 | ⬜ Planowany |
+
+---
+
+## Podsumowanie statusu
+
+### Aktualny postęp
+
+| Etap | Postęp | Zadania ukończone |
+|------|--------|-------------------|
+| Etap 1: Fundament | 100% | 5/5 |
+| Etap 2: Stabilizacja | 20% | 1/3 (częściowo) |
+| Etap 3: Rozszerzenie | 0% | 0/4 |
+| Etap 4: Produkcja | 5% | 0/4 (częściowo dokumentacja) |
+
+### Następne kroki
+
+1. ⬜ Dokończyć testy jednostkowe (Zadanie 2.1)
+2. ⬜ Implementacja walidacji danych (Zadanie 2.2)
+3. ⬜ Rozbudowa obsługi błędów (Zadanie 2.3)
+4. ⬜ Planowanie Etapu 3 - analiza priorytetów rozszerzeń
+
+---
+
+*Ostatnia aktualizacja: grudzień 2024*
