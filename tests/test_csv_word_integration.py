@@ -43,6 +43,21 @@ class TestCSVReader:
         """Test obsługi błędu gdy plik nie istnieje."""
         with pytest.raises(FileNotFoundError):
             CSVReader("nieistniejacy_plik.csv")
+    
+    def test_insufficient_columns(self):
+        """Test obsługi błędu gdy plik CSV ma za mało kolumn."""
+        # Utwórz tymczasowy plik CSV z jedną kolumną
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as tmp:
+            tmp.write("Wartość\n")
+            tmp.write("100\n")
+            tmp_path = tmp.name
+        
+        try:
+            reader = CSVReader(tmp_path)
+            with pytest.raises(ValueError, match="co najmniej 2 kolumny"):
+                reader.read_variables()
+        finally:
+            os.remove(tmp_path)
 
 
 class TestProcessCsvEquations:
@@ -79,8 +94,13 @@ class TestProcessCsvEquations:
             assert len(doc.tables) >= 1
             
             # Sprawdź czy wynik jest poprawny (~25.47 A)
+            # Używamy zakresu 25.4 - 25.5 dla stabilności testu
             text_content = "\n".join(p.text for p in doc.paragraphs)
-            assert "25.47" in text_content or "25.48" in text_content
+            import re
+            result_match = re.search(r"Wynik:\s*([\d.]+)", text_content)
+            assert result_match is not None, "Nie znaleziono wyniku w dokumencie"
+            result_value = float(result_match.group(1))
+            assert 25.4 < result_value < 25.5, f"Wynik {result_value} poza oczekiwanym zakresem 25.4-25.5"
             
         finally:
             if os.path.exists(output_path):

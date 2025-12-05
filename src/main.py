@@ -56,9 +56,7 @@ def process_csv_equations(
     
     # Generuj dokument Word
     writer = WordWriter(output_path)
-    
-    # Nadpisz tytuł dokumentu
-    writer.doc.paragraphs[0].text = title
+    writer.set_title(title)
     
     writer.add_variables_table(variables)
     writer.add_results_section(results)

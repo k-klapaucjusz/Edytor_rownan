@@ -28,6 +28,9 @@ class CSVReader:
         
         Returns:
             Słownik z nazwami zmiennych i ich wartościami
+            
+        Raises:
+            ValueError: Gdy plik CSV ma mniej niż 2 kolumny
         """
         df = pd.read_csv(self.file_path)
         
@@ -36,6 +39,11 @@ class CSVReader:
             return dict(zip(df["Nazwa zmiennej"], df["Wartość"]))
         
         # Alternatywny format: pierwsza kolumna to nazwa, druga to wartość
+        if len(df.columns) < 2:
+            raise ValueError(
+                f"Plik CSV musi mieć co najmniej 2 kolumny (nazwa i wartość). "
+                f"Znaleziono: {len(df.columns)} kolumn(y)."
+            )
         return dict(zip(df.iloc[:, 0], df.iloc[:, 1]))
     
     def read_variables_with_metadata(self) -> list[dict[str, Any]]:
