@@ -8,3 +8,10 @@ env/
 venv/
 .vscode/
 .idea/
+
+# pytest cache
+.pytest_cache/
+
+# Generated files
+*.docx
+!templates/*.xlsx

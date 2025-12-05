@@ -1,0 +1,1 @@
+"""Testy pakietu edytor równań."""
