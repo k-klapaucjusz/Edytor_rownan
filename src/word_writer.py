@@ -35,6 +35,16 @@ class WordWriter:
         title = self.doc.add_heading("Obliczenia", level=0)
         title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     
+    def set_title(self, title: str) -> None:
+        """
+        Ustawia tytuł dokumentu.
+        
+        Args:
+            title: Nowy tytuł dokumentu
+        """
+        if self.doc.paragraphs:
+            self.doc.paragraphs[0].text = title
+    
     def add_equation_section(self, equation_result: EquationResult) -> None:
         """
         Dodaje sekcję z równaniem do dokumentu.

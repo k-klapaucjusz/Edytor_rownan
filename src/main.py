@@ -1,16 +1,67 @@
 """
 Główny moduł programu Edytor równań.
 
-Program wczytuje dane z pliku Excel, wykonuje obliczenia
+Program wczytuje dane z pliku Excel lub CSV, wykonuje obliczenia
 i generuje dokument Word z wynikami.
 """
 
 import argparse
 from pathlib import Path
 
-from .excel_reader import ExcelReader
+from .excel_reader import CSVReader, ExcelReader
 from .equation_parser import EquationParser
 from .word_writer import WordWriter
+
+
+def process_csv_equations(
+    csv_path: str | Path,
+    output_path: str | Path,
+    equations: list[dict[str, str]],
+    title: str = "Obliczenia",
+) -> Path:
+    """
+    Przetwarza równania z danymi z pliku CSV i generuje dokument Word.
+    
+    Args:
+        csv_path: Ścieżka do pliku CSV z danymi (zmiennymi)
+        output_path: Ścieżka do pliku Word wyjściowego
+        equations: Lista równań do przetworzenia, każde jako słownik
+                   z kluczami 'name' (nazwa) i 'formula' (wzór)
+        title: Tytuł dokumentu
+        
+    Returns:
+        Ścieżka do wygenerowanego dokumentu
+        
+    Example:
+        >>> equations = [
+        ...     {"name": "Prąd fazowy", "formula": "P / (sqrt(3) * U * cos_phi)"}
+        ... ]
+        >>> process_csv_equations("dane.csv", "wynik.docx", equations)
+    """
+    # Wczytaj dane z CSV
+    reader = CSVReader(csv_path)
+    variables = reader.read_variables()
+    
+    # Przetwórz równania
+    parser = EquationParser(variables)
+    results = []
+    
+    for eq_data in equations:
+        name = eq_data.get("name", "Równanie")
+        formula = eq_data.get("formula", "")
+        
+        if formula:
+            result = parser.process_equation(name, formula)
+            results.append(result)
+    
+    # Generuj dokument Word
+    writer = WordWriter(output_path)
+    writer.set_title(title)
+    
+    writer.add_variables_table(variables)
+    writer.add_results_section(results)
+    
+    return writer.save()
 
 
 def process_equations(
@@ -70,11 +121,11 @@ def process_equations(
 def main():
     """Główna funkcja programu - interfejs wiersza poleceń."""
     parser = argparse.ArgumentParser(
-        description="Edytor równań - generowanie dokumentów Word z obliczeń Excel"
+        description="Edytor równań - generowanie dokumentów Word z obliczeń Excel lub CSV"
     )
     parser.add_argument(
-        "excel_file",
-        help="Ścieżka do pliku Excel z danymi i równaniami"
+        "input_file",
+        help="Ścieżka do pliku z danymi (Excel .xlsx lub CSV .csv)"
     )
     parser.add_argument(
         "-o", "--output",
@@ -84,23 +135,62 @@ def main():
     parser.add_argument(
         "--variables-sheet",
         default="Dane",
-        help="Nazwa arkusza ze zmiennymi (domyślnie: Dane)"
+        help="Nazwa arkusza ze zmiennymi - tylko dla plików Excel (domyślnie: Dane)"
     )
     parser.add_argument(
         "--equations-sheet",
         default="Równania",
-        help="Nazwa arkusza z równaniami (domyślnie: Równania)"
+        help="Nazwa arkusza z równaniami - tylko dla plików Excel (domyślnie: Równania)"
+    )
+    parser.add_argument(
+        "-e", "--equation",
+        action="append",
+        metavar="NAME:FORMULA",
+        help="Równanie w formacie 'Nazwa:wzór' (dla CSV). Można użyć wielokrotnie."
+    )
+    parser.add_argument(
+        "-t", "--title",
+        default="Obliczenia",
+        help="Tytuł dokumentu (domyślnie: Obliczenia)"
     )
     
     args = parser.parse_args()
     
     try:
-        output_file = process_equations(
-            args.excel_file,
-            args.output,
-            args.variables_sheet,
-            args.equations_sheet,
-        )
+        input_path = Path(args.input_file)
+        
+        # Rozpoznaj typ pliku na podstawie rozszerzenia
+        if input_path.suffix.lower() == ".csv":
+            # Tryb CSV - równania muszą być podane jako argumenty
+            if not args.equation:
+                print("Błąd: Dla plików CSV musisz podać równania przez -e/--equation")
+                print("Przykład: -e 'Prąd:P / (sqrt(3) * U * cos_phi)'")
+                return 1
+            
+            # Parsuj równania z argumentów
+            equations = []
+            for eq_str in args.equation:
+                if ":" in eq_str:
+                    name, formula = eq_str.split(":", 1)
+                    equations.append({"name": name.strip(), "formula": formula.strip()})
+                else:
+                    equations.append({"name": "Równanie", "formula": eq_str.strip()})
+            
+            output_file = process_csv_equations(
+                args.input_file,
+                args.output,
+                equations,
+                args.title,
+            )
+        else:
+            # Tryb Excel (domyślny)
+            output_file = process_equations(
+                args.input_file,
+                args.output,
+                args.variables_sheet,
+                args.equations_sheet,
+            )
+        
         print(f"Dokument wygenerowany pomyślnie: {output_file}")
     except FileNotFoundError as e:
         print(f"Błąd: {e}")
