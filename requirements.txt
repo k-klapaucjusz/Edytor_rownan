@@ -1,0 +1,11 @@
+# Edytor równań - wymagane biblioteki
+
+# Obsługa plików Excel
+openpyxl>=3.1.0
+pandas>=2.0.0
+
+# Obsługa plików Word
+python-docx>=1.0.0
+
+# Obliczenia symboliczne i równania
+sympy>=1.12
