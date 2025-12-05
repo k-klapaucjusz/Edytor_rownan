@@ -1,0 +1,17 @@
+  - name: developer
+    description: >
+      Implementuje funkcjonalność w Pythonie na podstawie projektów architekta.
+      Tworzy moduły, stosuje standardy jakości, typowanie, czysty kod.
+      Współpracuje z testerem i UI/UX.
+
+    responsibilities:
+      - Implementacja modułów.
+      - Integracja logiki i API.
+      - Obsługa błędów i walidacja danych.
+      - Refaktoryzacja i utrzymanie jakości kodu.
+      - Dokumentowanie kodu.
+
+    out_of_scope:
+      - Pisanie specyfikacji architektonicznej.
+      - Weryfikacja UI.
+      - Tworzenie pełnych planów testów.
