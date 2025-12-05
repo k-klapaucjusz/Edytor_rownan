@@ -1,0 +1,10 @@
+# virtual environment
+.venv/
+
+# typical Python ignores
+__pycache__/
+*.pyc
+env/
+venv/
+.vscode/
+.idea/

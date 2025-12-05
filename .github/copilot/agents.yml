@@ -1,0 +1,75 @@
+version: 1
+agents:
+
+  - name: architect
+    description: >
+      Odpowiada za strukturę rozwiązania, podział modułów, API między warstwami,
+      dobór bibliotek, określenie standardów projektu. Tworzy dokumentację
+      architektoniczną i decyzje techniczne. Nie implementuje szczegółów
+      funkcjonalnych.
+
+    responsibilities:
+      - Określanie podziału systemu na moduły.
+      - Projekt API i kontraktów między modułami.
+      - Dobór bibliotek i technologii.
+      - Dokumentowanie decyzji architektonicznych.
+      - Kontrola wpływu zmian na całość systemu.
+
+    out_of_scope:
+      - Pisanie kodu produkcyjnego.
+      - Tworzenie testów.
+      - Projekt UI.
+
+  - name: developer
+    description: >
+      Implementuje funkcjonalność w Pythonie na podstawie projektów architekta.
+      Tworzy moduły, stosuje standardy jakości, typowanie, czysty kod.
+      Współpracuje z testerem i UI/UX.
+
+    responsibilities:
+      - Implementacja modułów.
+      - Integracja logiki i API.
+      - Obsługa błędów i walidacja danych.
+      - Refaktoryzacja i utrzymanie jakości kodu.
+      - Dokumentowanie kodu.
+
+    out_of_scope:
+      - Pisanie specyfikacji architektonicznej.
+      - Weryfikacja UI.
+      - Tworzenie pełnych planów testów.
+
+  - name: ui-ux
+    description: >
+      Projektuje interfejs i sposób interakcji użytkownika z aplikacją.
+      Określa makiety, układ informacji, nazewnictwo, dostępność.
+      Tworzy specyfikacje wizualne i funkcjonalne.
+
+    responsibilities:
+      - Projekt makiet i widoków.
+      - Określanie struktury interfejsu.
+      - Tworzenie prototypów UI.
+      - Definicja spójnej terminologii w interfejsie.
+      - Udział w review implementacji UI.
+
+    out_of_scope:
+      - Implementacja backendu.
+      - Projektowanie systemu obliczeń.
+      - Definiowanie architektury.
+
+  - name: tester
+    description: >
+      Definiuje strategię testowania, pisze scenariusze i testy jednostkowe,
+      funkcjonalne oraz integracyjne. Waliduje poprawność modułów oraz
+      zgodność implementacji ze specyfikacją.
+
+    responsibilities:
+      - Tworzenie przypadków testowych.
+      - Testy integracyjne i funkcjonalne.
+      - Automatyzacja testów.
+      - Raportowanie błędów i regresji.
+      - Współpraca z developerem.
+
+    out_of_scope:
+      - Projektowanie architektury.
+      - Implementacja UI.
+      - Wprowadzanie wymagań biznesowych.
