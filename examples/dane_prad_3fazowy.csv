@@ -1,0 +1,4 @@
+Nazwa zmiennej,Wartość,Jednostka,Opis
+P,15000,W,Moc czynna
+U,400,V,Napięcie międzyfazowe
+cos_phi,0.85,-,Współczynnik mocy
