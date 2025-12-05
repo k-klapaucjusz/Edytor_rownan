@@ -546,4 +546,257 @@ sympy>=1.12          # Obliczenia symboliczne
 
 ---
 
+## Przypadek użycia: Obliczenia prądu w układzie 3-fazowym
+
+### Opis przypadku
+
+Generowanie dokumentu Word z obliczeniami prądu fazowego w trójfazowym układzie elektrycznym na podstawie danych wejściowych: moc (P), napięcie (U), współczynnik mocy (cos φ).
+
+### Plik danych wejściowych
+
+**Lokalizacja:** `examples/dane_prad_3fazowy.csv`
+
+```csv
+Nazwa zmiennej,Wartość,Jednostka,Opis
+P,15000,W,Moc czynna
+U,400,V,Napięcie międzyfazowe
+cos_phi,0.85,-,Współczynnik mocy
+```
+
+### Wzory matematyczne (LaTeX)
+
+#### Wzór główny - prąd fazowy
+
+```latex
+I = \frac{P}{\sqrt{3} \cdot U \cdot \cos(\varphi)}
+```
+
+**Renderowanie:** 
+
+$$I = \frac{P}{\sqrt{3} \cdot U \cdot \cos(\varphi)}$$
+
+#### Po podstawieniu wartości
+
+```latex
+I = \frac{15000}{\sqrt{3} \cdot 400 \cdot 0.85} = \frac{15000}{588.88} \approx 25.48 \, \text{A}
+```
+
+---
+
+### Plan działania - szczegółowe zadania
+
+#### Faza 1: Przygotowanie danych (Dane wejściowe)
+
+| Zadanie | Opis | Status | Plik/Moduł |
+|---------|------|--------|------------|
+| **1.1** | Utworzyć plik CSV z danymi | ✅ | `examples/dane_prad_3fazowy.csv` |
+| **1.2** | Zdefiniować strukturę danych (zmienne) | ✅ | P, U, cos_phi |
+| **1.3** | Określić jednostki miar | ✅ | W, V, - |
+| **1.4** | Przygotować wzór matematyczny | ✅ | `I = P / (sqrt(3) * U * cos_phi)` |
+
+---
+
+#### Faza 2: Wczytywanie danych z CSV
+
+| Zadanie | Opis | Status | Plik/Moduł |
+|---------|------|--------|------------|
+| **2.1** | Rozszerzyć ExcelReader o obsługę CSV | ⬜ | `src/excel_reader.py` |
+| **2.2** | Parsowanie kolumn: nazwa, wartość, jednostka | ⬜ | `read_variables()` |
+| **2.3** | Walidacja danych wejściowych | ⬜ | Sprawdzenie typów |
+| **2.4** | Obsługa błędów (brakujące kolumny) | ⬜ | Exception handling |
+
+**Kryteria akceptacji:**
+- [ ] Moduł wczytuje dane z pliku CSV
+- [ ] Zmienne są poprawnie mapowane do słownika
+- [ ] Jednostki są zachowane w metadanych
+
+---
+
+#### Faza 3: Definiowanie równania
+
+| Zadanie | Opis | Status | Plik/Moduł |
+|---------|------|--------|------------|
+| **3.1** | Zdefiniować równanie w formacie tekstowym | ⬜ | `P / (sqrt(3) * U * cos_phi)` |
+| **3.2** | Parsowanie równania przez SymPy | ⬜ | `equation_parser.py` |
+| **3.3** | Generowanie wersji LaTeX równania | ⬜ | `to_latex()` |
+| **3.4** | Podstawienie wartości liczbowych | ⬜ | `substitute_values()` |
+| **3.5** | Obliczenie wyniku końcowego | ⬜ | `calculate()` |
+
+**Kryteria akceptacji:**
+- [ ] Równanie jest poprawnie parsowane
+- [ ] LaTeX: `\frac{P}{\sqrt{3} \cdot U \cdot \cos(\varphi)}`
+- [ ] Wynik: ~25.48 A
+
+---
+
+#### Faza 4: Generowanie dokumentu Word
+
+| Zadanie | Opis | Status | Plik/Moduł |
+|---------|------|--------|------------|
+| **4.1** | Utworzyć strukturę dokumentu | ⬜ | `word_writer.py` |
+| **4.2** | Dodać nagłówek "Obliczenia elektryczne" | ⬜ | `add_heading()` |
+| **4.3** | Wstawić tabelę z danymi wejściowymi | ⬜ | `add_variables_table()` |
+| **4.4** | Wstawić wzór oryginalny (LaTeX/OMML) | ⬜ | `add_equation_section()` |
+| **4.5** | Wstawić wzór z podstawionymi wartościami | ⬜ | Format: `I = 15000/(1.732*400*0.85)` |
+| **4.6** | Wstawić wynik z jednostką | ⬜ | `I = 25.48 A` |
+| **4.7** | Zapisać dokument jako .docx | ⬜ | `save()` |
+
+**Kryteria akceptacji:**
+- [ ] Dokument zawiera wszystkie sekcje
+- [ ] Wzory są czytelne i poprawnie sformatowane
+- [ ] Wynik jest zaokrąglony do 2 miejsc po przecinku
+
+---
+
+#### Faza 5: Formatowanie równań (LaTeX → Word)
+
+| Zadanie | Opis | Status | Plik/Moduł |
+|---------|------|--------|------------|
+| **5.1** | Konwersja LaTeX → OMML (Office Math) | ⬜ | Nowy moduł lub biblioteka |
+| **5.2** | Wstawianie obiektów matematycznych | ⬜ | `python-docx` + `lxml` |
+| **5.3** | Obsługa symboli specjalnych (√, φ) | ⬜ | Unicode / OMML |
+| **5.4** | Fallback do tekstu ASCII jeśli OMML nie działa | ⬜ | `sqrt(3)` zamiast `√3` |
+
+**Kryteria akceptacji:**
+- [ ] Równania wyświetlają się poprawnie w MS Word
+- [ ] Symbole matematyczne są czytelne
+- [ ] Dokument otwiera się bez błędów
+
+---
+
+#### Faza 6: Testowanie i walidacja
+
+| Zadanie | Opis | Status | Plik/Moduł |
+|---------|------|--------|------------|
+| **6.1** | Test wczytywania CSV | ⬜ | `tests/test_csv_reader.py` |
+| **6.2** | Test parsowania równania 3-fazowego | ⬜ | `tests/test_equation_parser.py` |
+| **6.3** | Test generowania dokumentu | ⬜ | `tests/test_word_writer.py` |
+| **6.4** | Test end-to-end (CSV → Word) | ⬜ | `tests/test_integration.py` |
+| **6.5** | Walidacja ręczna dokumentu w MS Word | ⬜ | Sprawdzenie wizualne |
+
+**Kryteria akceptacji:**
+- [ ] Wszystkie testy przechodzą
+- [ ] Wynik obliczeń jest poprawny matematycznie
+- [ ] Dokument Word otwiera się bez błędów
+
+---
+
+### Przepływ danych dla przypadku 3-fazowego
+
+```
+┌─────────────────────┐
+│  dane_prad_3fazowy  │
+│       .csv          │
+│                     │
+│  P = 15000 W        │
+│  U = 400 V          │
+│  cos_phi = 0.85     │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│   CSVReader         │
+│   (wczytanie)       │
+│                     │
+│  variables = {      │
+│    'P': 15000,      │
+│    'U': 400,        │
+│    'cos_phi': 0.85  │
+│  }                  │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  EquationParser     │
+│                     │
+│  wzór: P/(sqrt(3)   │
+│        *U*cos_phi)  │
+│                     │
+│  LaTeX: \frac{P}... │
+│  wynik: 25.48       │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│    WordWriter       │
+│                     │
+│  1. Nagłówek        │
+│  2. Tabela danych   │
+│  3. Wzór (LaTeX)    │
+│  4. Podstawienie    │
+│  5. Wynik           │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  obliczenia_prad    │
+│     _3fazowy.docx   │
+│                     │
+│  ┌───────────────┐  │
+│  │ Dane wejściowe│  │
+│  │ P=15000W      │  │
+│  │ U=400V        │  │
+│  │ cosφ=0.85     │  │
+│  ├───────────────┤  │
+│  │ Wzór:         │  │
+│  │ I = P/(√3·U·  │  │
+│  │     ·cosφ)    │  │
+│  ├───────────────┤  │
+│  │ Obliczenie:   │  │
+│  │ I = 15000/    │  │
+│  │   (1.732·400· │  │
+│  │    ·0.85)     │  │
+│  ├───────────────┤  │
+│  │ Wynik:        │  │
+│  │ I = 25.48 A   │  │
+│  └───────────────┘  │
+└─────────────────────┘
+```
+
+---
+
+### Przykładowa zawartość dokumentu wynikowego
+
+**Tytuł:** Obliczenia prądu w układzie trójfazowym
+
+**1. Dane wejściowe:**
+
+| Symbol | Wartość | Jednostka | Opis |
+|--------|---------|-----------|------|
+| P | 15000 | W | Moc czynna |
+| U | 400 | V | Napięcie międzyfazowe |
+| cos φ | 0.85 | - | Współczynnik mocy |
+
+**2. Wzór:**
+
+$$I = \frac{P}{\sqrt{3} \cdot U \cdot \cos(\varphi)}$$
+
+**3. Podstawienie wartości:**
+
+$$I = \frac{15000}{\sqrt{3} \cdot 400 \cdot 0.85}$$
+
+**4. Obliczenie:**
+
+$$I = \frac{15000}{1.732 \cdot 400 \cdot 0.85} = \frac{15000}{588.88} = 25.48$$
+
+**5. Wynik:**
+
+$$\boxed{I = 25.48 \, \text{A}}$$
+
+---
+
+### Podsumowanie zadań
+
+| Faza | Nazwa | Liczba zadań | Status |
+|------|-------|--------------|--------|
+| 1 | Przygotowanie danych | 4 | ✅ Ukończone |
+| 2 | Wczytywanie CSV | 4 | ⬜ Do zrobienia |
+| 3 | Definiowanie równania | 5 | ⬜ Do zrobienia |
+| 4 | Generowanie Word | 7 | ⬜ Do zrobienia |
+| 5 | Formatowanie LaTeX | 4 | ⬜ Do zrobienia |
+| 6 | Testowanie | 5 | ⬜ Do zrobienia |
+| **Razem** | | **29 zadań** | **4/29 (14%)** |
+
+---
+
 *Ostatnia aktualizacja: grudzień 2024*
